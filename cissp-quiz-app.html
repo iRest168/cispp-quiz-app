@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CISPP 問題回答アプリ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .question-container {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .question-number {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1.5em; /* 大きくする */
+            color: #4CAF50;   /* 目立つ色 */
+        }
+        .options {
+            margin-top: 10px;
+        }
+        .option {
+            margin-bottom: 5px;
+        }
+        .option input {
+            margin-right: 10px;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            display: none; /* Initially hidden */
+        }
+        .review-section {
+            margin-top: 20px;
+        }
+        .review-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .correct {
+            background-color: #d4edda;
+        }
+        .incorrect {
+            background-color: #f8d7da;
+        }
+        .notes-container {
+            margin-top: 10px;
+        }
+        .notes-container textarea {
+            width: 100%;
+            height: 60px;
+            margin-top: 5px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .understanding-container {
+            margin-top: 10px;
+        }
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+            border-radius: 8px 8px 0 0;
+        }
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 10px 16px;
+            transition: 0.3s;
+            color: black; /* Set text color to black */
+        }
+        .tab button:hover {
+            background-color: #ddd;
+        }
+        .tab button.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .tabcontent {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+        }
+        .progress-bar {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .progress {
+            width: 0%;
+            height: 20px;
+            background-color: #4CAF50;
+            border-radius: 5px;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+            position: relative; /* 相対位置指定 */
+
+        }
+        .answer-key-container {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .answer-key-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .answer-key-number {
+            width: 50px;
+            text-align: right;
+            margin-right: 10px;
+        }
+        .answer-key-options {
+            display: flex;
+        }
+        .answer-key-option {
+            margin-right: 15px;
+            cursor: pointer;
+        }
+        .answer-key-option input {
+            margin-right: 5px;
+        }
+        .save-button {
+            margin-top: 10px;
+        }
+        .answer-key-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+       .understanding-options {
+            display: flex;
+            gap: 10px;
+        }
+       .understanding-option {
+           display:flex;
+           align-items:center;
+        }
+       .understanding-option input[type="radio"]{
+           margin-right: 5px;
+        }
+        .delete-button {
+          background-color: #f44336; /* Red */
+          color: white;
+          margin-left: 10px;
+          padding: 5px 10px;
+          font-size: 12px;
+      }
+      .profile-section{
+          margin-bottom:20px;
+      }
+      .history-item {
+        display: inline-block; /* 横並びにする */
+        margin-right: 5px;
+        padding: 2px 5px;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+    }
+    .history-correct {
+        background-color: #d4edda; /* Green */
+        color: black;
+    }
+    .history-incorrect {
+        background-color: #f8d7da; /* Red */
+        color: black;
+    }
+    .history-unanswered {
+        background-color: #f0f0f0; /* Gray */
+        color: black;
+    }
+    .progress-text {
+      position: absolute; /* 絶対位置指定 */
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: black; /* プログレスバー内のテキスト色 */
+      font-weight: bold;
+    }
+    .question-status{
+        text-align: center;
+    }
+     .past-results-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .past-results-table th, .past-results-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: center;
+    }
+    .past-results-table th {
+        background-color: #f2f2f2;
+    }
+    .low-understanding-list {
+      list-style: none;
+      padding: 0;
+    }
+  .low-understanding-item{
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      padding: 10px;
+      border-radius: 5px;
+  }
+  .answer-key-input{
+    width: 40px;
+    margin-right:10px
+  }
+  .start-content-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between; /* 両端揃え */
+        margin-bottom: 10px; /* 下側の余白 */
+    }
+    .start-button {
+        margin-left: 20px; /* ボタンの左側の余白 */
+        /* その他のボタンスタイル (必要に応じて) */
+    }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CISPP 問題回答アプリ</h1>
+
+        <div class="profile-section">
+            <label for="profileSelect">プロファイル:</label>
+            <select id="profileSelect" onchange="changeProfile()"></select>
+            <input type="text" id="newProfileName" placeholder="新しいプロファイル名">
+            <button onclick="addProfile()">プロファイル追加</button>
+          </div>
+          <div>
+              <label for="questionCount">問題数:</label>
+              <input type="number" id="questionCount" value="180" min="1">
+              <button onclick="setQuestionCount()">問題数設定</button>
+          </div>
+
+        <div class="tab">
+            <button class="tablinks active" onclick="openTab(event, 'questionTab')">問題</button> <!-- 初期タブ -->
+            <button class="tablinks" onclick="openTab(event, 'answerKeyTab')">解答設定</button>
+            <button class="tablinks" onclick="openTab(event, 'resultsTab')">結果</button>
+            <button class="tablinks" onclick="openTab(event, 'reviewTab')">振り返り</button>
+        </div>
+
+        <div id="questionTab" class="tabcontent" style="display: block;">
+          <!-- ここに startTab と questionTab の内容を統合 -->
+            <div id="startContent">
+              <div class="start-content-header">
+                <h2>問題スタート</h2>
+                <button onclick="startQuiz()" class="start-button">問題開始</button>
+                </div>
+                <div id="pastResultsSummary">
+                  <!-- 過去の正答率履歴 -->
+                </div>
+                <div id="lowUnderstandingList">
+                  <!-- 理解度が低い問題のリスト -->
+                </div>
+            </div>
+
+            <div id="questionContent" style="display: none;">  <!-- 問題表示部分は initially hidden -->
+                <div class="progress-bar">
+                    <div class="progress" id="progressBar">
+                        <div class="progress-text" id="progressText"></div>
+                    </div>
+                </div>
+
+                <div class="question-status">
+                    <span id="currentQuestion">1</span> / <span id="totalQuestions">180</span> 問中
+                </div>
+
+                <div class="question-container" id="questionContainer">
+                    <div class="question-number">問題 <span id="questionNumber">1</span></div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="answer" id="optionA" value="A">
+                            <label for="optionA">A</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="answer" id="optionB" value="B">
+                            <label for="optionB">B</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="answer" id="optionC" value="C">
+                            <label for="optionC">C</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="answer" id="optionD" value="D">
+                            <label for="optionD">D</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="controls">
+                    <button id="prevButton" onclick="prevQuestion()">前の問題</button>
+                    <button id="nextButton" onclick="nextQuestion()">次の問題</button>
+                    <button id="finishButton" onclick="finishQuiz()">終了</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="answerKeyTab" class="tabcontent">
+            <h2>解答設定</h2>
+            <p>各問題の正解を選択してください。</p>
+            <div class="answer-key-container" id="answerKeyContainer">
+                <!-- Answer key will be generated here -->
+            </div>
+            <!-- ページネーション関連の要素は削除 -->
+            <button class="save-button" onclick="saveAnswerKey()">保存</button>
+        </div>
+
+        <div id="resultsTab" class="tabcontent">
+          <h2>結果</h2>
+            <div class="results" id="resultsContainer">
+                <p>正解数: <span id="correctCount">0</span> / <span id="answeredCount">0</span></p>
+                <p>正答率: <span id="accuracyRate">0%</span></p>
+                <p>未回答: <span id="unansweredCount">180</span></p>
+            </div>
+            <!-- <button onclick="checkAnswers()">答え合わせ</button>  このボタンは削除 -->
+            <div id="pastResults"></div>
+        </div>
+
+        <div id="reviewTab" class="tabcontent">
+            <h2>振り返り</h2>
+            <div id="reviewContainer">
+                <!-- Review items will be generated here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+      let totalQuestions = 180;
+      let currentQuestion = 1;
+      let userAnswers = Array(totalQuestions).fill(null);
+      let correctAnswers = Array(totalQuestions).fill(null);
+      let notes = Array(totalQuestions).fill("");
+      let understanding = Array(totalQuestions).fill(0);
+      let currentAnswerKeyPage = 0;
+      const questionsPerPage = 15;
+      let attempts = []; // 各回の結果を保存する配列
+      let profiles = {}; // プロファイルを保存するオブジェクト
+      let currentProfile = "default"; // 現在のプロファイル名
+
+
+      document.addEventListener('DOMContentLoaded', function() {
+          loadFromLocalStorage(); // ロードを最初に行う
+          updateQuestion();
+          generateAnswerKeyUI();
+          updateResultsTab();
+          updateProfileSelect(); // プロファイルセレクトボックスを更新
+          document.addEventListener('keydown', handleKeyPress);
+
+          // ラジオボタンにクリックイベントリスナーを追加
+          const radioButtons = document.querySelectorAll('.option input[type="radio"]');
+          radioButtons.forEach(radio => {
+              radio.addEventListener('click', toggleRadioButton);
+          });
+          showStartTabContent(); // 追加: スタート画面の内容を表示
+
+      });
+
+      function loadFromLocalStorage() {
+          // ... (既存のロード処理) ...
+          const savedProfiles = localStorage.getItem('cispProfiles');
+          const savedCurrentProfile = localStorage.getItem('cispCurrentProfile');
+
+          if (savedProfiles) profiles = JSON.parse(savedProfiles);
+          if (savedCurrentProfile) currentProfile = savedCurrentProfile;
+
+          // プロファイルが存在しない場合、デフォルトプロファイルを作成
+          if (!profiles[currentProfile]) {
+              profiles[currentProfile] = {
+                  totalQuestions: totalQuestions,
+                  userAnswers: Array(totalQuestions).fill(null),
+                  correctAnswers: Array(totalQuestions).fill(null),
+                  notes: Array(totalQuestions).fill(""),
+                  understanding: Array(totalQuestions).fill(0),
+                  attempts: []
+              };
+          }
+
+          // 現在のプロファイルをロード
+          totalQuestions = profiles[currentProfile].totalQuestions;
+          userAnswers = [...profiles[currentProfile].userAnswers]; //ディープコピー
+          correctAnswers = [...profiles[currentProfile].correctAnswers];
+          notes = [...profiles[currentProfile].notes];
+          understanding = [...profiles[currentProfile].understanding];
+          attempts = [...profiles[currentProfile].attempts];
+
+          // 問題数をUIに反映
+          document.getElementById('questionCount').value = totalQuestions;
+
+      }
+
+      function saveToLocalStorage() {
+        // 現在のプロファイルにデータを保存
+          profiles[currentProfile] = {
+              totalQuestions: totalQuestions,
+              userAnswers: [...userAnswers],
+              correctAnswers: [...correctAnswers],
+              notes: [...notes],
+              understanding: [...understanding],
+              attempts: [...attempts]
+          };
+
+          localStorage.setItem('cispProfiles', JSON.stringify(profiles));
+          localStorage.setItem('cispCurrentProfile', currentProfile);
+
+      }
+
+      function updateProfileSelect() {
+          const select = document.getElementById('profileSelect');
+          select.innerHTML = ''; // 内容をクリア
+
+          for (const profileName in profiles) {
+              const option = document.createElement('option');
+              option.value = profileName;
+              option.textContent = profileName;
+              select.appendChild(option);
+          }
+          // 現在のプロファイルを選択状態にする
+          select.value = currentProfile;
+      }
+
+      function addProfile() {
+        const newProfileName = document.getElementById('newProfileName').value.trim();
+        if (newProfileName && !profiles[newProfileName]) {
+            profiles[newProfileName] = { // 新しいプロファイルを作成
+              totalQuestions: 180, // デフォルトの問題数
+              userAnswers: Array(180).fill(null),
+              correctAnswers: Array(180).fill(null),
+              notes: Array(180).fill(""),
+              understanding: Array(180).fill(0),
+              attempts: []
+            };
+            currentProfile = newProfileName; // 新しいプロファイルを現在のプロファイルに
+            loadFromLocalStorage(); // プロファイルをロード（初期化を兼ねる）
+            updateProfileSelect(); // セレクトボックスを更新
+            saveToLocalStorage(); //変更を保存
+            document.getElementById('newProfileName').value = ''; // 入力欄をクリア
+
+        } else {
+          if(profiles[newProfileName]){
+              alert("既に存在するプロファイル名です");
+          }else{
+            alert('プロファイル名を入力してください');
+          }
+
+        }
+    }
+
+    function changeProfile() {
+        currentProfile = document.getElementById('profileSelect').value;
+        loadFromLocalStorage(); // 選択されたプロファイルをロード
+        updateQuestion();      // 問題表示を更新
+        generateAnswerKeyUI(); // 解答設定UIを更新
+        updateResultsTab();     // 結果タブを更新
+        saveToLocalStorage();
+    }
+
+      function setQuestionCount() {
+          const newCount = parseInt(document.getElementById('questionCount').value);
+          if (newCount > 0) {
+              // 配列のサイズ変更とデータの調整
+              const oldTotalQuestions = totalQuestions;
+              totalQuestions = newCount;
+
+              userAnswers = resizeArray(userAnswers, totalQuestions, null);
+              correctAnswers = resizeArray(correctAnswers, totalQuestions, null);
+              notes = resizeArray(notes, totalQuestions, "");
+              understanding = resizeArray(understanding, totalQuestions, 0);
+
+
+              // attempts 内の各試行のデータもリサイズ
+                attempts.forEach(attempt => {
+                  attempt.userAnswers = resizeArray(attempt.userAnswers, totalQuestions, null);
+                  attempt.correctAnswers = resizeArray(attempt.correctAnswers, totalQuestions, null);
+                  attempt.notes = resizeArray(attempt.notes, totalQuestions, "");
+                  attempt.understanding = resizeArray(attempt.understanding, totalQuestions, 0);
+
+                  // 回答数、正解数も調整（はみ出た部分を削除）
+                  attempt.answeredCount = attempt.userAnswers.filter(answer => answer !== null).length;
+                  attempt.correctCount = 0;
+                  for (let i = 0; i < totalQuestions; i++) { //新しい問題数まで
+                      if (attempt.userAnswers[i] === attempt.correctAnswers[i]) {
+                          attempt.correctCount++;
+                      }
+                  }
+                  //正答率再計算
+                  attempt.accuracyRate = attempt.answeredCount > 0 ? (attempt.correctCount / attempt.answeredCount) * 100 : 0;
+
+              });
+
+
+              // 現在の問題番号が新しい問題数を超える場合は調整
+              if (currentQuestion > totalQuestions) {
+                  currentQuestion = totalQuestions;
+              }
+
+              updateQuestion();
+              generateAnswerKeyUI(); // 解答設定UIも更新
+              updateResultsTab();     //結果タブも更新
+              saveToLocalStorage();   // 変更を保存
+
+          } else {
+              alert("問題数は1以上に設定してください");
+          }
+      }
+
+      // 配列のサイズを変更する汎用関数
+      function resizeArray(arr, newSize, defaultValue) {
+          const newArr = Array(newSize).fill(defaultValue);
+          for (let i = 0; i < Math.min(arr.length, newSize); i++) {
+              newArr[i] = arr[i];
+          }
+          return newArr;
+      }
+
+    function openTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+
+        if (tabName === 'questionTab') {
+            showStartTabContent(); // 「問題」タブ表示時にスタート画面の内容を表示
+            document.getElementById('questionContent').style.display = 'none'; // 問題表示は隠す
+            document.getElementById('startContent').style.display = 'block';
+
+        }
+        if(tabName === 'reviewTab'){
+          generateReviewUI();
+        }
+        if(tabName === 'resultsTab'){
+            updateResults();
+        }
+    }
+
+    function updateProgressBar() {
+        const answeredCount = userAnswers.filter(answer => answer !== null).length;
+        const progress = (answeredCount / totalQuestions) * 100;
+        document.getElementById('progressBar').style.width = progress + '%';
+        document.getElementById('progressBar').textContent = Math.round(progress) + '%'; // % 表記に戻す
+        // document.getElementById('progressText').textContent = `${currentQuestion} / ${totalQuestions}`; // コメントアウト
+
+    }
+
+    function updateQuestion() {
+        document.getElementById('questionNumber').textContent = `問題 ${currentQuestion}`; // 問題番号の表示形式変更
+        document.getElementById('currentQuestion').textContent = currentQuestion;
+        document.getElementById('totalQuestions').textContent = totalQuestions;
+
+        document.getElementById('prevButton').disabled = currentQuestion === 1;
+        document.getElementById('nextButton').disabled = currentQuestion === totalQuestions;
+
+        const options = document.getElementsByName('answer');
+        for (let i = 0; i < options.length; i++) {
+            options[i].checked = false;
+                // data-checked 属性もリセット
+            options[i].dataset.checked = 'false';
+        }
+
+        if (userAnswers[currentQuestion - 1] !== null) {
+            const selectedOption = document.getElementById(`option${userAnswers[currentQuestion - 1]}`);
+            if (selectedOption) {
+                selectedOption.checked = true;
+                selectedOption.dataset.checked = 'true'; // data-checked 属性を設定
+
+            }
+        }
+
+        updateProgressBar();
+
+    }
+
+    function prevQuestion() {
+        if (currentQuestion > 1) {
+            saveCurrentAnswer();
+            currentQuestion--;
+            updateQuestion();
+        }
+    }
+
+    function nextQuestion() {
+        if (currentQuestion < totalQuestions) {
+            saveCurrentAnswer();
+            currentQuestion++;
+            updateQuestion();
+        }
+    }
+
+    function finishQuiz() {
+        saveCurrentAnswer();
+        checkAnswers(); // 答え合わせ処理を呼び出す (未回答があっても)
+        openTab({ currentTarget: document.querySelector('.tablinks:nth-child(4)') }, 'resultsTab'); // 結果タブへ移動, startTabが追加されたので、4番目
+    }
+
+
+    function handleKeyPress(event) {
+    if (document.getElementById('questionContent').style.display === 'block') { //startContentが表示されている時は動作しない
+        switch (event.key) {
+            case '1':
+                document.getElementById('optionA').checked = true;
+                break;
+            case '2':
+                document.getElementById('optionB').checked = true;
+                break;
+            case '3':
+                document.getElementById('optionC').checked = true;
+                break;
+            case '4':
+                document.getElementById('optionD').checked = true;
+                break;
+            case 'r':
+                nextQuestion();
+                break;
+            case 'e':
+                prevQuestion();
+                break;
+        }
+        saveCurrentAnswer();
+    }
+    }
+    function toggleRadioButton(event) {
+    const radio = event.target;
+    if (radio.dataset.checked === 'true') {
+        radio.checked = false;
+        radio.dataset.checked = 'false';
+        userAnswers[currentQuestion - 1] = null; // 回答をクリア
+    } else {
+        radio.dataset.checked = 'true';
+        // 他のラジオボタンの data-checked 属性を false に
+        document.querySelectorAll('.option input[type="radio"]').forEach(otherRadio => {
+            if(otherRadio !== radio){
+                otherRadio.dataset.checked = 'false';
+            }
+        });
+    }
+    }
+    function saveCurrentAnswer() {
+        const options = document.getElementsByName('answer');
+        for (let i = 0; i < options.length; i++) {
+            if (options[i].checked) {
+                userAnswers[currentQuestion - 1] = options[i].value;
+                break;
+            }
+        }
+        saveToLocalStorage();
+    }
+
+    function generateAnswerKeyUI() {
+        const container = document.getElementById('answerKeyContainer');
+        container.innerHTML = '';
+
+        for (let i = 0; i < totalQuestions; i++) {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'answer-key-row';
+
+            const numberSpan = document.createElement('span');
+            numberSpan.className = 'answer-key-number';
+            numberSpan.textContent = `${i + 1}:`;
+            questionDiv.appendChild(numberSpan);
+
+            // テキスト入力欄
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'answer-key-input';
+            input.value = correctAnswers[i] || ''; // 既存の値を設定
+            input.dataset.questionNumber = i + 1; // data-* 属性で問題番号を保持
+            input.addEventListener('input', handleAnswerKeyInput);
+            questionDiv.appendChild(input);
+
+            // ラジオボタン (既存のまま)
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'answer-key-options';
+            const options = ['A', 'B', 'C', 'D'];
+            options.forEach(option => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'answer-key-option';
+                const radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.name = `correct${i + 1}`;
+                radio.value = option;
+                radio.id = `correct${i + 1}${option}`;
+                radio.checked = correctAnswers[i] === option;
+                const label = document.createElement('label');
+                label.htmlFor = `correct${i + 1}${option}`;
+                label.textContent = option;
+                optionDiv.appendChild(radio);
+                optionDiv.appendChild(label);
+                optionsDiv.appendChild(optionDiv);
+            });
+            questionDiv.appendChild(optionsDiv);
+            container.appendChild(questionDiv);
+        }
+    }
+
+    function handleAnswerKeyInput(event) {
+        const input = event.target;
+        const questionNumber = parseInt(input.dataset.questionNumber, 10);
+        const value = input.value.trim();
+
+        // 入力値が 1, 2, 3, 4 のいずれかの場合
+        if (['1', '2', '3', '4'].includes(value)) {
+          correctAnswers[questionNumber -1] = value; //保存
+            // 次の問題の入力欄にフォーカスを移動
+            const nextInput = document.querySelector(`.answer-key-input[data-question-number="${questionNumber + 1}"]`);
+            if (nextInput) {
+                nextInput.focus();
+            }
+        }
+    }
+
+  function checkAnswers() {
+    const answeredCount = userAnswers.filter(answer => answer !== null).length;
+    let correctCount = 0;
+    for (let i = 0; i < totalQuestions; i++) {
+        if (userAnswers[i] === correctAnswers[i]) {
+            correctCount++;
+        }
+    }
+
+    const accuracyRate = answeredCount > 0 ? (correctCount / answeredCount) * 100 : 0;
+    const unansweredCount = totalQuestions - answeredCount;
+
+    //今回の結果を保存
+    attempts.push({
+        userAnswers: [...userAnswers], // 配列のコピーを作成して保存
+        correctAnswers: [...correctAnswers],
+        notes: [...notes],
+        understanding: [...understanding],
+        correctCount: correctCount,
+        answeredCount: answeredCount,
+        accuracyRate: accuracyRate
+    });
+
+
+    document.getElementById('correctCount').textContent = correctCount;
+    document.getElementById('answeredCount').textContent = answeredCount;
+    document.getElementById('accuracyRate').textContent = accuracyRate.toFixed(2) + '%';
+    document.getElementById('unansweredCount').textContent = unansweredCount;
+
+    document.getElementById('resultsContainer').style.display = 'block';
+
+    generateReviewUI();
+    saveToLocalStorage();
+    updateResultsTab();
+    openTab({ currentTarget: document.querySelector('.tablinks:nth-child(4)') }, 'reviewTab'); //startTabが追加されたので5番目
+}
+
+
+function generateReviewUI() {
+    const container = document.getElementById('reviewContainer');
+    container.innerHTML = ''; // Clear previous content
+
+    for (let i = 0; i < totalQuestions; i++) {
+        const reviewItem = document.createElement('div');
+        reviewItem.className = 'review-item';
+
+        const questionNumber = document.createElement('div');
+        questionNumber.textContent = `問題 ${i + 1}`;
+        reviewItem.appendChild(questionNumber);
+
+        // 過去の回答履歴を表示
+        const historyContainer = document.createElement('div');
+        historyContainer.className = 'history-container';
+        attempts.forEach((attempt, attemptIndex) => {
+            const historyItem = document.createElement('span');
+            historyItem.className = 'history-item';
+            const answer = attempt.userAnswers[i];
+            const isCorrect = answer === attempt.correctAnswers[i];
+
+            if (answer === null) {
+                historyItem.textContent = '-';
+                historyItem.classList.add('history-unanswered');
+            } else {
+                historyItem.textContent = answer;
+                historyItem.classList.add(isCorrect ? 'history-correct' : 'history-incorrect');
+            }
+            historyContainer.appendChild(historyItem);
+        });
+        reviewItem.appendChild(historyContainer);
+
+        const notesContainer = document.createElement('div');
+        notesContainer.className = 'notes-container';
+        const notesLabel = document.createElement('label');
+        notesLabel.textContent = 'メモ:';
+        notesContainer.appendChild(notesLabel);
+        const textarea = document.createElement('textarea');
+        textarea.value = notes[i];
+        textarea.onchange = (event) => {
+            notes[i] = event.target.value;
+            saveToLocalStorage();
+        };
+        notesContainer.appendChild(textarea);
+        reviewItem.appendChild(notesContainer);
+
+
+        const understandingContainer = document.createElement("div");
+        understandingContainer.className = "understanding-container";
+        const understandingLabel = document.createElement("label");
+        understandingLabel.textContent = "理解度:";
+        understandingContainer.appendChild(understandingLabel);
+
+        const understandingOptions = document.createElement("div");
+        understandingOptions.className = "understanding-options";
+
+        // 理解度ラジオボタン (3段階)
+        const options = [
+            { value: 0, label: 'わからない' },
+            { value: 1, label: 'ふつう' },
+            { value: 2, label: 'わかる' },
+        ];
+
+        options.forEach(option => {
+            const optionContainer = document.createElement("div");
+            optionContainer.className = "understanding-option";
+
+            const radio = document.createElement("input");
+            radio.type = "radio";
+            radio.name = `understanding${i + 1}`;
+            radio.value = option.value;
+            radio.id = `understanding${i + 1}-${option.value}`;
+            radio.checked = understanding[i] == option.value;  //現在の値に設定
+
+            radio.onchange = () => {
+            understanding[i] = parseInt(radio.value, 10); // 0, 1, 2 のいずれかに
+            saveToLocalStorage();
+            }
+
+            const label = document.createElement("label");
+            label.htmlFor = `understanding${i + 1}-${option.value}`;
+            label.textContent = option.label;
+
+            optionContainer.appendChild(radio);
+            optionContainer.appendChild(label);
+            understandingOptions.appendChild(optionContainer);
+        });
+
+        understandingContainer.appendChild(understandingOptions);
+        reviewItem.appendChild(understandingContainer);
+        container.appendChild(reviewItem);
+    }
+}
+
+    function updateResultsTab() {
+    const pastResultsContainer = document.getElementById('pastResults');
+    pastResultsContainer.innerHTML = ''; // Clear existing content
+
+    if (attempts.length > 0) {
+        const heading = document.createElement('h3');
+        heading.textContent = '過去の結果';
+        pastResultsContainer.appendChild(heading);
+
+        attempts.forEach((attempt, index) => {
+            const attemptDiv = document.createElement('div');
+            attemptDiv.textContent = `${index + 1}回目: 正答率 ${attempt.accuracyRate.toFixed(2)}% (${attempt.correctCount} / ${attempt.answeredCount})`;
+
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = '削除';
+            deleteButton.className = 'delete-button';
+            deleteButton.onclick = () => {
+                attempts.splice(index, 1); // 配列から削除
+                saveToLocalStorage();    // ローカルストレージを更新
+                updateResultsTab();      // 表示を更新
+            };
+            attemptDiv.appendChild(deleteButton);
+            pastResultsContainer.appendChild(attemptDiv);
+        });
+    } else {
+        const noResult = document.createElement('p');
+        noResult.textContent = "過去の記録はありません。";
+        pastResultsContainer.appendChild(noResult);
+
+    }
+    }
+
+    function updateResults(){
+    const answeredCount = userAnswers.filter(answer => answer !== null).length;
+    const unansweredCount = totalQuestions - answeredCount;
+
+    document.getElementById('answeredCount').textContent = answeredCount;
+    document.getElementById('unansweredCount').textContent = unansweredCount;
+    }
+
+    function startQuiz() {
+        // 問題番号をリセット
+        currentQuestion = 1;
+        // userAnswers を初期化 (現在のプロファイルの問題数に合わせる)
+        userAnswers = Array(totalQuestions).fill(null);
+
+        // 問題表示部分を表示、スタート画面を非表示
+        document.getElementById('startContent').style.display = 'none';
+        document.getElementById('questionContent').style.display = 'block';
+
+        updateQuestion(); // 問題表示を更新
+        saveToLocalStorage(); //初期化を保存
+    }
+
+
+    function showStartTabContent() {
+        const pastResultsSummary = document.getElementById('pastResultsSummary');
+        const lowUnderstandingList = document.getElementById('lowUnderstandingList');
+
+        // 過去の正答率の履歴
+        pastResultsSummary.innerHTML = '';
+        if (attempts.length > 0) {
+            const table = document.createElement('table');
+            table.className = 'past-results-table';
+            table.innerHTML = `
+                <tr>
+                    <th>回数</th>
+                    <th>正答率</th>
+                    <th>(正解数 / 回答数)</th>
+                    <th>削除</th>
+                </tr>
+            `;
+
+            attempts.forEach((attempt, index) => {
+            const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${attempt.accuracyRate.toFixed(2)}%</td>
+                    <td>(${attempt.correctCount} / ${attempt.answeredCount})</td>
+                    <td>
+                        <button class="delete-button" onclick="deleteAttempt(${index})">削除</button>
+                    </td>
+                `;
+                table.appendChild(row);
+            });
+            pastResultsSummary.appendChild(table);
+        }else{
+        pastResultsSummary.innerHTML = '<p>過去の記録はありません。</p>';
+        }
+
+        // 理解度が低い問題のリスト
+        lowUnderstandingList.innerHTML = '';
+        const lowUnderstandingItems = [];
+
+        // 全試行の理解度情報を集計
+        const understandingCounts = Array(totalQuestions).fill(0).map(()=> ({sum: 0, count: 0})); // {sum: 合計, count: 試行回数}
+        attempts.forEach(attempt => {
+            attempt.understanding.forEach((value, index) => {
+            understandingCounts[index].sum += value;
+            understandingCounts[index].count++;
+            });
+        });
+        // 平均理解度を計算し、低いもの（平均が1以下）を抽出
+        for (let i = 0; i < totalQuestions; i++) {
+            if(understandingCounts[i].count > 0){  //回答履歴がある場合
+            const averageUnderstanding = understandingCounts[i].sum / understandingCounts[i].count;
+                if (averageUnderstanding <= 1) {
+                    //最後のattemptからメモを取得
+                    lowUnderstandingItems.push({ questionNumber: i + 1, note: attempts[attempts.length - 1].notes[i] });
+                }
+            }
+        }
+        if (lowUnderstandingItems.length > 0) {
+            const list = document.createElement('ul');
+            list.className = "low-understanding-list";
+
+                lowUnderstandingItems.forEach(item => {
+                    const listItem = document.createElement('li');
+                    listItem.className = "low-understanding-item";
+                    listItem.textContent = `問題 ${item.questionNumber}: ${item.note || 'メモなし'}`;
+                    list.appendChild(listItem);
+                });
+                lowUnderstandingList.appendChild(list);
+        } else {
+            lowUnderstandingList.innerHTML = '<p>理解度が低い問題はありません。</p>';
+        }
+    }
+
+    function deleteAttempt(index) {
+            attempts.splice(index, 1);
+            saveToLocalStorage();
+            updateResultsTab();
+            showStartTabContent(); // スタート画面も更新
+        }
+
+    </script>
+</body>
+</html>
